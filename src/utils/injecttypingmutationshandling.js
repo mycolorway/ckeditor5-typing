@@ -157,7 +157,7 @@ class MutationHandler {
 
 		const diffResult = diff( oldText, newText );
 
-		const { firstChangeAt, insertions, deletions } = calculateChanges( diffResult );
+		const { firstChangeAt, insertions, deletions } = calculateChanges( diffResult, oldText, newText );
 
 		// Try setting new model selection according to passed view selection.
 		let modelSelectionRange = null;
@@ -207,7 +207,7 @@ class MutationHandler {
 
 		const diffResult = diff( oldText, newText );
 
-		const { firstChangeAt, insertions, deletions } = calculateChanges( diffResult );
+		const { firstChangeAt, insertions, deletions } = calculateChanges( diffResult, oldText, newText );
 
 		// Try setting new model selection according to passed view selection.
 		let modelSelectionRange = null;
@@ -291,7 +291,7 @@ function isSafeForTextMutation( children, schema ) {
 // @private
 // @param diffResult
 // @returns {{insertions: number, deletions: number, firstChangeAt: *}}
-function calculateChanges( diffResult ) {
+function calculateChanges( diffResult, oldText, newText ) {
 	// Index where the first change happens. Used to set the position from which nodes will be removed and where will be inserted.
 	let firstChangeAt = null;
 	// Index where the last change happens. Used to properly count how many characters have to be removed and inserted.
@@ -323,6 +323,12 @@ function calculateChanges( diffResult ) {
 			insertions++;
 		}
 	}
+
+	const oldTextArray = Array.from( oldText );
+	const newTextArray = Array.from( newText );
+	deletions = oldTextArray.slice( firstChangeAt, firstChangeAt + deletions ).join( '' ).length;
+	insertions = newTextArray.slice( firstChangeAt, firstChangeAt + insertions ).join( '' ).length;
+	firstChangeAt = newTextArray.slice( 0, firstChangeAt ).join( '' ).length;
 
 	return { insertions, deletions, firstChangeAt };
 }
